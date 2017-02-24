@@ -3,11 +3,9 @@ summary: |-
   Change value in file. (e.g. constants)
 description: |-
   Change value in file. (e.g. constants)
-website: https://github.com/BOOMik/step_change_value
-source_code_url: https://github.com/BOOMik/step_change_value
-support_url: https://github.com/BOOMik/step_change_value/issues
-source:
-  git: https://github.com/BOOMik/steps-set-ios-version.git
+website: https://github.com/bitrise-community/steps-change-value
+source_code_url: https://github.com/bitrise-community/steps-change-value
+support_url: https://github.com/bitrise-community/steps-change-value/issues
 type_tags:
   - build
   - utils
