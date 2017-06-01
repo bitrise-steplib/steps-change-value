@@ -64,9 +64,7 @@ echo "exiting..."
 }
 
 echo " (i) Replacing..."
-set -x
 sed -i '' -e 's%'"$old_value"'%'"$new_value"'%g' "${file}"
-set +x
 echo " (i) Done"
 
 
