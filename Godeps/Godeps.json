@@ -1,0 +1,18 @@
+{
+	"ImportPath": "github.com/bitrise-community/steps-change-value",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/fileutil",
+			"Rev": "9c30a7825aa1064e423a0f1dba751fec990b07be"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
+			"Rev": "9c30a7825aa1064e423a0f1dba751fec990b07be"
+		}
+	]
+}

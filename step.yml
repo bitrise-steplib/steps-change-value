@@ -8,6 +8,9 @@ source_code_url: https://github.com/bitrise-community/steps-change-value
 support_url: https://github.com/bitrise-community/steps-change-value/issues
 type_tags:
   - utility
+toolkit:
+  go:
+    package_name: github.com/bitrise-community/steps-change-value
 inputs:
   - file:
     opts:

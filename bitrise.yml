@@ -12,6 +12,19 @@ workflows:
             #!/bin/bash
             set -ex
             stepman audit --step-yml ./step.yml
+  deps-update:
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            go get -u -v github.com/tools/godep
+            rm -rf ./Godeps
+            rm -rf ./vendor
+            go get -t -d ./...
+            godep save ./...
   share-this-step:
     description: |-
       If this is the first time you try to share a Step you should
