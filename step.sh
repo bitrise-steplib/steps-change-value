@@ -31,76 +31,66 @@ echo " (i) Provided new_value: ${new_value}"
 echo ""
 
 if [ "${show_file}" == "true" ]; then
-    echo ""
-    echo "------------------------------------------"
-    echo "------------------------------------------"
+    echo
     echo "------------------------------------------"
     echo "-------------OLD  FILE--------------------"
     echo "------------------------------------------"
+    cat -n "${file}"
+    echo
     echo "------------------------------------------"
-    echo "------------------------------------------"
-    echo ""
-    cat -n ${file}
+    echo
 fi
 
 # ---------------------
 # --- Main:
 
-# verbose / debug print commands
-#set -v
 {
-    echo " (i) Finding line(s) with old value..." 
-    
-    result=$(ls -l | grep -n "$old_value" ${file})
-    if [ "$result" ]; then
+    echo " (i) Finding line(s) with old value..."
+
+    result="$(ls -l | grep -n "$old_value" "${file}")"
+    if [ ! -z "$result" ]; then
         echo " (i) Found line(s):"
         echo "$result"
-        #found='true'
-    else 
+    else
         echo " (e) Old value not found"
-        if [ "${notfound_exit}" == "true" ]; then
+        if [[ "${notfound_exit}" == "true" ]] ; then
             exit 1
-            else
+        else
             exit 0
         fi
     fi
-} || { 
+} || {
 echo "exiting..."
 }
 
-#if [ "${found}" ] ; then
- 
 echo " (i) Replacing..."
-sed -i '' -e 's%'"$old_value"'%'"$new_value"'%g' ${file}
+sed -i '' -e 's%'"$old_value"'%'"$new_value"'%g' "${file}"
 echo " (i) Done"
 
 
 {
-    echo " (i) Finding line(s) with new value..." 
-    
-    resultNew=$(ls -l | grep -n "$new_value" ${file})
-    if [ "$resultNew" ]; then
+    echo " (i) Finding line(s) with new value..."
+
+    resultNew="$(ls -l | grep -n "$new_value" "${file}")"
+    if [[ ! -z "$resultNew" ]] ; then
         echo " (i) Found line(s):"
         echo "$resultNew"
-    else 
+    else
         echo " (e) New value not found."
         echo " (e) Replacing failed"
         exit 1
     fi
-} || { 
-echo "exiting..." 
+} || {
+echo "exiting..."
 }
 
 
-if [ "${show_file}" == "true" ]; then
-    echo ""
-    echo "------------------------------------------"
-    echo "------------------------------------------"
+if [[ "${show_file}" == "true" ]] ; then
+    echo
     echo "------------------------------------------"
     echo "-------------NEW  FILE--------------------"
     echo "------------------------------------------"
+    cat -n "${file}"
+    echo
     echo "------------------------------------------"
-    echo "------------------------------------------"
-    echo ""
-    cat -n ${file}
 fi

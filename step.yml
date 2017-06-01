@@ -7,12 +7,7 @@ website: https://github.com/bitrise-community/steps-change-value
 source_code_url: https://github.com/bitrise-community/steps-change-value
 support_url: https://github.com/bitrise-community/steps-change-value/issues
 type_tags:
-  - build
-  - utils
-  - xamarin
-  - ios
-  - android
-  - code
+  - utility
 inputs:
   - file:
     opts:
@@ -34,20 +29,18 @@ inputs:
       summary: "To replace"
       description: |
         new value
-      is_required: true  
+      is_required: true
   - show_file: "false"
     opts:
       title: "Show old and new file content"
       summary: "For debug"
-      is_required: false
       value_options:
       - "true"
-      - "false"      
+      - "false"
   - notfound_exit: "true"
     opts:
       title: "Mark as \"Failed\" if value isn't found."
       summary: "To mark a step as \"Failed\" if value for replacing isn't found."
-      is_required: false
       value_options:
       - "true"
       - "false"

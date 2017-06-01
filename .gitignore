@@ -1,5 +1,2 @@
 .bitrise*
-*/obj/*
-*/bin/*
-packages/
-Components/
+_tmp
