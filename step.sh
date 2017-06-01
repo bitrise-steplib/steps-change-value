@@ -71,7 +71,7 @@ echo "exiting..."
 #if [ "${found}" ] ; then
  
 echo " (i) Replacing..."
-sed -i '' -e 's%'"$old_value"'%'"$new_value"'%g' ${file}
+sed -i 's%'"$old_value"'%'"$new_value"'%g' ${file}
 echo " (i) Done"
 
 
