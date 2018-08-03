@@ -17,7 +17,7 @@ inputs:
       title: "File path"
       summary: ""
       description: |
-        The file that you want to change a value.
+        The file in which you want to change a value.
       is_required: true
   - old_value:
     opts:
