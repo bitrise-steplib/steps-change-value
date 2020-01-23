@@ -16,7 +16,7 @@ func main() {
 		inputOldValue                 = os.Getenv("old_value")
 		inputNewValue                 = os.Getenv("new_value")
 		inputIsShowFileContent        = os.Getenv("show_file") == "true"
-		inputIsFailIfOldValueNotFound = os.Getenv("notfound_exit") == "false"
+		inputIsFailIfOldValueNotFound = os.Getenv("notfound_exit") == "true"
 	)
 
 	if inputFile == "" {
