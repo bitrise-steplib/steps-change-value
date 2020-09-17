@@ -38,12 +38,12 @@ inputs:
       title: "Show old and new file content"
       summary: "For debug"
       value_options:
-        - "true"
-        - "false"
+      - "true"
+      - "false"
   - notfound_exit: "true"
     opts:
-      title: 'Mark as "Failed" if value isn''t found.'
-      summary: 'To mark a step as "Failed" if value for replacing isn''t found.'
+      title: "Mark as \"Failed\" if value isn't found."
+      summary: "To mark a step as \"Failed\" if value for replacing isn't found."
       value_options:
-        - "true"
-        - "false"
+      - "true"
+      - "false"
