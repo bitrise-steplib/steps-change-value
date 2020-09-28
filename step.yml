@@ -3,14 +3,14 @@ summary: |-
   Change value in file. (e.g. constants)
 description: |-
   Change value in file. (e.g. constants)
-website: https://github.com/bitrise-community/steps-change-value
-source_code_url: https://github.com/bitrise-community/steps-change-value
-support_url: https://github.com/bitrise-community/steps-change-value/issues
+website: https://github.com/bitrise-steplib/steps-change-value
+source_code_url: https://github.com/bitrise-steplib/steps-change-value
+support_url: https://github.com/bitrise-steplib/steps-change-value/issues
 type_tags:
   - utility
 toolkit:
   go:
-    package_name: github.com/bitrise-community/steps-change-value
+    package_name: github.com/bitrise-steplib/steps-change-value
 inputs:
   - file:
     opts:
