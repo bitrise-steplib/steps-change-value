@@ -15,7 +15,7 @@ inputs:
   - file:
     opts:
       title: "File path"
-      summary: ""
+      summary: "Target file path"
       description: |
         The file in which you want to change a value.
       is_required: true
