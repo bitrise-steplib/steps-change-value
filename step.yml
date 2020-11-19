@@ -1,49 +1,45 @@
 title: Change value in file
-summary: |-
-  Change value in file. (e.g. constants)
-description: |-
-  Change value in file. (e.g. constants)
+summary: This Step changes a selected value in a targeted file. (e.g. constants)
+description: This Step changes a selected value in a targeted file. (e.g. constants)
+
 website: https://github.com/bitrise-steplib/steps-change-value
 source_code_url: https://github.com/bitrise-steplib/steps-change-value
 support_url: https://github.com/bitrise-steplib/steps-change-value/issues
+
 type_tags:
   - utility
 toolkit:
   go:
     package_name: github.com/bitrise-steplib/steps-change-value
+
 inputs:
   - file:
     opts:
       title: "File path"
-      summary: "Target file path"
-      description: |
-        The file in which you want to change a value.
+      summary: "The targeted file path (relative from root folder) in which you want to change a value."
+      description: "The targeted file path (relative from root folder) in which you want to change a value."
       is_required: true
   - old_value:
     opts:
-      title: "Old value"
-      summary: "For replace"
-      description: |
-        current value in file
+      title: "Current value"
+      summary: "The current value which needs to be changed."
+      description: "The current value which needs to be changed in the targeted file."
       is_required: true
   - new_value:
     opts:
       title: "New value"
-      summary: "To replace"
-      description: |
-        new value
+      summary: "The new value after it's changed."
+      description: "The new value after it's changed in the targeted file."
       is_required: true
   - show_file: "false"
     opts:
-      title: "Show old and new file content"
-      summary: "For debug"
+      title: "Show file content before and after the value change?"
       value_options:
       - "true"
       - "false"
   - notfound_exit: "true"
     opts:
-      title: "Mark as \"Failed\" if value isn't found."
-      summary: "To mark a step as \"Failed\" if value for replacing isn't found."
+      title: "Mark the Step as \"Failed\" if the selected value isn't found?"
       value_options:
       - "true"
       - "false"
