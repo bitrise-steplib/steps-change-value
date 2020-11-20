@@ -1,22 +1,21 @@
 title: "Change value in file"
-summary: |-
-  Changes a selected value in a targeted file.
+summary: Changes a selected value in a targeted file.
 description: |-
   This Step changes a selected value in a targeted file, for example, constants.
 
-    ### Configuring the Step
+  ### Configuring the Step
 
-    1. Set the File path in which you want to change a value.
-    2. Set the Current value which needs to be changed.
-    3. Set the New value.
+  1. Set the **File path** in which you want to change a value.
+  2. Set the **Current value** which needs to be changed.
+  3. Set the **New value**.
 
-    ### Troubleshooting
-    Please make sure that your targeted file path is correct, existing and relative from root folder.
-    Please make sure that you set a correct Current value which exists in the the targeted file. You must define this value.
-    Please make sure that you define the New value.
+  ### Troubleshooting
+  Please make sure that your targeted file path is correct, existing and relative from the root folder.
+  Please make sure that you set a correct **Current value** which exists in the the targeted file. You must define this value.
+  Please make sure that you define the New value.
 
-    ### Related Steps
-    - [Change Working Directory for subsequent Steps](https://www.bitrise.io/integrations/steps/change-workdir)
+  ### Related Steps
+  - [Change Working Directory for subsequent Steps](https://www.bitrise.io/integrations/steps/change-workdir)
 
 website: https://github.com/bitrise-steplib/steps-change-value
 source_code_url: https://github.com/bitrise-steplib/steps-change-value
