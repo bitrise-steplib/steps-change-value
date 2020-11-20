@@ -1,6 +1,22 @@
-title: Change value in file
-summary: This Step changes a selected value in a targeted file. (e.g. constants)
-description: This Step changes a selected value in a targeted file. (e.g. constants)
+title: "Change value in file"
+summary: |-
+  Changes a selected value in a targeted file.
+description: |-
+  This Step changes a selected value in a targeted file, for example, constants.
+
+    ### Configuring the Step
+
+    1. Set the File path in which you want to change a value.
+    2. Set the Current value which needs to be changed.
+    3. Set the New value.
+
+    ### Troubleshooting
+    Please make sure that your targeted file path is correct, existing and relative from root folder.
+    Please make sure that you set a correct Current value which exists in the the targeted file. You must define this value.
+    Please make sure that you define the New value.
+
+    ### Related Steps
+    - [Change Working Directory for subsequent Steps](https://www.bitrise.io/integrations/steps/change-workdir)
 
 website: https://github.com/bitrise-steplib/steps-change-value
 source_code_url: https://github.com/bitrise-steplib/steps-change-value
@@ -17,19 +33,16 @@ inputs:
     opts:
       title: "File path"
       summary: "The targeted file path (relative from root folder) in which you want to change a value."
-      description: "The targeted file path (relative from root folder) in which you want to change a value."
       is_required: true
   - old_value:
     opts:
       title: "Current value"
-      summary: "The current value which needs to be changed."
-      description: "The current value which needs to be changed in the targeted file."
+      summary: "The current value which needs to be changed in the targeted file."
       is_required: true
   - new_value:
     opts:
       title: "New value"
-      summary: "The new value after it's changed."
-      description: "The new value after it's changed in the targeted file."
+      summary: "The new value after it's changed in the targeted file."
       is_required: true
   - show_file: "false"
     opts:
