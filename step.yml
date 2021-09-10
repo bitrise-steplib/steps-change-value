@@ -41,7 +41,7 @@ inputs:
   - new_value:
     opts:
       title: "New value"
-      summary: "The new value after it's changed in the targeted file."
+      summary: "The new value you want to write to the target file."
       is_required: true
   - show_file: "false"
     opts:
