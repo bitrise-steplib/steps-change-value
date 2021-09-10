@@ -45,7 +45,7 @@ inputs:
       is_required: true
   - show_file: "false"
     opts:
-      title: "Show file content before and after the value change?"
+      title: "Print file content before and after the value change"
       value_options:
       - "true"
       - "false"
