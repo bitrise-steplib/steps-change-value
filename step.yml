@@ -51,7 +51,7 @@ inputs:
       - "false"
   - notfound_exit: "true"
     opts:
-      title: "Mark the Step as \"Failed\" if the selected value isn't found?"
+      title: "Mark the Step as \"Failed\" if the selected value isn't found"
       value_options:
       - "true"
       - "false"
