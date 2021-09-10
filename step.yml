@@ -31,7 +31,7 @@ inputs:
   - file:
     opts:
       title: "File path"
-      summary: "The targeted file path (relative from root folder) in which you want to change a value."
+      summary: "The target file path in which you want to change a value."
       is_required: true
   - old_value:
     opts:
