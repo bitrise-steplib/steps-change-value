@@ -1,49 +1,57 @@
-title: Change value in file
-summary: |-
-  Change value in file. (e.g. constants)
+title: "Change value in file"
+summary: Changes a selected value in a targeted file.
 description: |-
-  Change value in file. (e.g. constants)
+  This Step changes a selected value in a targeted file, for example, constants.
+
+  ### Configuring the Step
+
+  1. Set the **File path** in which you want to change a value.
+  2. Set the **Current value** which needs to be changed.
+  3. Set the **New value**.
+
+  ### Troubleshooting
+  Please make sure that your targeted file path is correct, existing and relative from the root folder.
+  Please make sure that you set a correct **Current value** which exists in the the targeted file. You must define this value.
+  Please make sure that you define the New value.
+
+  ### Related Steps
+  - [Change Working Directory for subsequent Steps](https://www.bitrise.io/integrations/steps/change-workdir)
+
 website: https://github.com/bitrise-steplib/steps-change-value
 source_code_url: https://github.com/bitrise-steplib/steps-change-value
 support_url: https://github.com/bitrise-steplib/steps-change-value/issues
+
 type_tags:
   - utility
 toolkit:
   go:
     package_name: github.com/bitrise-steplib/steps-change-value
+
 inputs:
   - file:
     opts:
       title: "File path"
-      summary: "Target file path"
-      description: |
-        The file in which you want to change a value.
+      summary: "The target file path in which you want to change a value."
       is_required: true
   - old_value:
     opts:
-      title: "Old value"
-      summary: "For replace"
-      description: |
-        current value in file
+      title: "Current value"
+      summary: "The current value which needs to be changed in the target file."
       is_required: true
   - new_value:
     opts:
       title: "New value"
-      summary: "To replace"
-      description: |
-        new value
+      summary: "The new value you want to write to the target file."
       is_required: true
   - show_file: "false"
     opts:
-      title: "Show old and new file content"
-      summary: "For debug"
+      title: "Print file content before and after the value change"
       value_options:
       - "true"
       - "false"
   - notfound_exit: "true"
     opts:
-      title: "Mark as \"Failed\" if value isn't found."
-      summary: "To mark a step as \"Failed\" if value for replacing isn't found."
+      title: "Mark the Step as \"Failed\" if the selected value isn't found"
       value_options:
       - "true"
       - "false"
