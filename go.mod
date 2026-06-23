@@ -1,5 +1,8 @@
 module github.com/bitrise-steplib/steps-change-value
 
-go 1.16
+go 1.21
 
-require github.com/bitrise-io/go-utils v0.0.0-20210903141333-9e20aaef213f
+require (
+	github.com/bitrise-io/go-steputils/v2 v2.0.0-alpha.50
+	github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.36
+)

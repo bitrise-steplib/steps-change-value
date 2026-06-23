@@ -2,71 +2,122 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-
 	"strings"
 
-	"github.com/bitrise-io/go-utils/fileutil"
+	"github.com/bitrise-io/go-steputils/v2/stepconf"
+	"github.com/bitrise-io/go-utils/v2/env"
+	"github.com/bitrise-io/go-utils/v2/log"
 )
 
-func main() {
-	var (
-		inputFile                     = os.Getenv("file")
-		inputOldValue                 = os.Getenv("old_value")
-		inputNewValue                 = os.Getenv("new_value")
-		inputIsShowFileContent        = os.Getenv("show_file") == "true"
-		inputIsFailIfOldValueNotFound = os.Getenv("notfound_exit") == "true"
-	)
+// Input holds raw step inputs parsed from environment variables.
+type Input struct {
+	File         string `env:"file,required"`
+	OldValue     string `env:"old_value,required"`
+	NewValue     string `env:"new_value"`
+	ShowFile     bool   `env:"show_file"`
+	NotfoundExit bool   `env:"notfound_exit"`
+}
 
-	if inputFile == "" {
-		log.Fatal("No file input specified")
-	}
-	if inputOldValue == "" {
-		log.Fatal("No old_value input specified")
-	}
-	if inputNewValue == "" {
-		log.Fatal("No new_value input specified")
-	}
+// Config holds validated step configuration.
+type Config struct {
+	file         string
+	oldValue     string
+	newValue     string
+	showFile     bool
+	notfoundExit bool
+}
 
-	origContent, err := fileutil.ReadStringFromFile(inputFile)
+// Step implements the change-value step logic.
+type Step struct {
+	inputParser stepconf.InputParser
+	logger      log.Logger
+}
+
+// NewStep creates a Step with injected dependencies.
+func NewStep(inputParser stepconf.InputParser, logger log.Logger) Step {
+	return Step{
+		inputParser: inputParser,
+		logger:      logger,
+	}
+}
+
+// ProcessConfig parses and validates step inputs.
+func (s Step) ProcessConfig() (Config, error) {
+	var input Input
+	if err := s.inputParser.Parse(&input); err != nil {
+		return Config{}, fmt.Errorf("failed to parse inputs: %w", err)
+	}
+	stepconf.Print(input)
+	return Config{
+		file:         input.File,
+		oldValue:     input.OldValue,
+		newValue:     input.NewValue,
+		showFile:     input.ShowFile,
+		notfoundExit: input.NotfoundExit,
+	}, nil
+}
+
+// Run performs the value replacement in the target file.
+func (s Step) Run(cfg Config) error {
+	content, err := os.ReadFile(cfg.file)
 	if err != nil {
-		log.Fatalf("Failed to read from specified file, error: %s", err)
+		return fmt.Errorf("failed to read file (%s): %w", cfg.file, err)
 	}
 
-	if inputIsShowFileContent {
-		fmt.Println()
-		fmt.Println("------------------------------------------")
-		fmt.Println("-------------OLD  FILE--------------------")
-		fmt.Println("------------------------------------------")
-		fmt.Print(origContent)
-		fmt.Println()
-		fmt.Println("------------------------------------------")
+	if cfg.showFile {
+		s.logger.Printf("")
+		s.logger.Printf("------------------------------------------")
+		s.logger.Printf("-------------OLD  FILE--------------------")
+		s.logger.Printf("------------------------------------------")
+		s.logger.Printf("%s", string(content))
+		s.logger.Printf("------------------------------------------")
 	}
 
-	if inputIsFailIfOldValueNotFound {
-		if !strings.Contains(origContent, inputOldValue) {
-			log.Fatalf("Provided old value (%s) was not found in the file (%s)", inputOldValue, inputFile)
-		}
+	if cfg.notfoundExit && !strings.Contains(string(content), cfg.oldValue) {
+		return fmt.Errorf("old value (%s) was not found in the file (%s)", cfg.oldValue, cfg.file)
 	}
 
-	// replace
-	fmt.Println(" (i) Replacing...")
-	replacedContent := strings.Replace(origContent, inputOldValue, inputNewValue, -1)
+	s.logger.Printf("Replacing...")
+	replaced := strings.ReplaceAll(string(content), cfg.oldValue, cfg.newValue)
 
-	if inputIsShowFileContent {
-		fmt.Println()
-		fmt.Println("------------------------------------------")
-		fmt.Println("-------------NEW  FILE--------------------")
-		fmt.Println("------------------------------------------")
-		fmt.Print(replacedContent)
-		fmt.Println()
-		fmt.Println("------------------------------------------")
+	if cfg.showFile {
+		s.logger.Printf("")
+		s.logger.Printf("------------------------------------------")
+		s.logger.Printf("-------------NEW  FILE--------------------")
+		s.logger.Printf("------------------------------------------")
+		s.logger.Printf("%s", replaced)
+		s.logger.Printf("------------------------------------------")
 	}
 
-	// write back to file
-	if err := fileutil.WriteStringToFile(inputFile, replacedContent); err != nil {
-		log.Printf("Failed to write replaced content back to file, error: %s", err)
+	if err := os.WriteFile(cfg.file, []byte(replaced), 0644); err != nil {
+		return fmt.Errorf("failed to write file (%s): %w", cfg.file, err)
 	}
-	fmt.Println(" (i) Done")
+
+	s.logger.Donef("Done")
+	return nil
+}
+
+func main() {
+	os.Exit(run())
+}
+
+func run() int {
+	logger := log.NewLogger()
+	envRepository := env.NewRepository()
+	inputParser := stepconf.NewInputParser(envRepository)
+	step := NewStep(inputParser, logger)
+
+	cfg, err := step.ProcessConfig()
+	if err != nil {
+		logger.Errorf(err.Error())
+		return 1
+	}
+
+	if err := step.Run(cfg); err != nil {
+		logger.Errorf(err.Error())
+		return 1
+	}
+
+	return 0
 }

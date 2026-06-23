@@ -1,0 +1,98 @@
+format_version: "11"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+workflows:
+  test_replace_value:
+    description: Tests that a value is correctly replaced in a target file.
+    envs:
+    - TEST_FILE_PATH: ./test.txt
+    - ORIGINAL_TEST_FILE_CONTENT: |-
+        this is the first line
+        the second line
+        and finally the third line
+    - REPLACE_THIS: second
+    - REPLACE_WITH: 2nd
+    - EXPECTED_TEST_FILE_CONTENT_AFTER_REPLACE: |-
+        this is the first line
+        the 2nd line
+        and finally the third line
+    steps:
+    - change-workdir:
+        title: Switch working dir to test _tmp dir
+        run_if: "true"
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        title: Generate test input file
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            echo -n "$ORIGINAL_TEST_FILE_CONTENT" > "$TEST_FILE_PATH"
+    - path::../:
+        run_if: "true"
+        inputs:
+        - show_file: "true"
+        - file: $TEST_FILE_PATH
+        - old_value: $REPLACE_THIS
+        - new_value: $REPLACE_WITH
+    - script:
+        title: Verify file content after replacement
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            file_content="$(cat "$TEST_FILE_PATH")"
+            if [[ "$file_content" != "$EXPECTED_TEST_FILE_CONTENT_AFTER_REPLACE" ]] ; then
+              echo "File content did not match expected value!"
+              exit 1
+            fi
+            echo "Perfect!"
+
+  test_notfound_exit:
+    description: Tests that the step fails when notfound_exit is true and the old value does not exist in the file.
+    steps:
+    - script:
+        title: Run step expecting failure, verify exit code
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -x # Do not set -e: the inner bitrise run is expected to fail
+            bitrise run --config e2e/bitrise.yml _notfound_utility
+            if [ $? -ne 1 ] ; then
+              echo "Workflow was expected to fail but did not."
+              exit 1
+            fi
+
+  _notfound_utility:
+    envs:
+    - TEST_FILE_PATH: ./test.txt
+    - ORIGINAL_TEST_FILE_CONTENT: |-
+        this is the first line
+
+        and finally the third line
+    - REPLACE_THIS: second
+    - REPLACE_WITH: 2nd
+    steps:
+    - change-workdir:
+        title: Switch working dir to test _tmp dir
+        run_if: "true"
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        title: Generate test input file
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            echo -n "$ORIGINAL_TEST_FILE_CONTENT" > "$TEST_FILE_PATH"
+    - path::../:
+        run_if: "true"
+        inputs:
+        - show_file: "true"
+        - file: $TEST_FILE_PATH
+        - old_value: $REPLACE_THIS
+        - new_value: $REPLACE_WITH
+        - notfound_exit: true
