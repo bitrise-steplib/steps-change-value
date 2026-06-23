@@ -95,4 +95,4 @@ workflows:
         - file: $TEST_FILE_PATH
         - old_value: $REPLACE_THIS
         - new_value: $REPLACE_WITH
-        - notfound_exit: true
+        - notfound_exit: "true"
