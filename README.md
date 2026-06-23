@@ -17,7 +17,7 @@ This Step changes a selected value in a targeted file, for example, constants.
 
 ### Troubleshooting
 Please make sure that your targeted file path is correct, existing and relative from the root folder.
-Please make sure that you set a correct **Current value** which exists in the the targeted file. You must define this value.
+Please make sure that you set a correct **Current value** which exists in the targeted file. You must define this value.
 Please make sure that you define the New value.
 
 ### Related Steps
@@ -38,7 +38,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | Key | Description | Flags | Default |
 | --- | --- | --- | --- |
 | `file` | Path to the file in which the value replacement will be performed. The path must be relative to the repository root. | required |  |
-| `old_value` | The exact string to search for and replace in the target file. The step fails if this value is not found and **Mark the Step as Failed if not found** is enabled. | required |  |
+| `old_value` | The exact string to search for and replace in the target file. The step fails if this value is not found and Mark the Step as Failed if not found is enabled. | required |  |
 | `new_value` | The string that replaces all occurrences of the current value in the target file. | required |  |
 | `show_file` | When enabled, prints the full file content to the build log before and after the replacement. |  | `false` |
 | `notfound_exit` | When enabled, the step fails if the current value is not found in the target file. Disable this to allow the step to succeed even if no replacement was made. |  | `true` |

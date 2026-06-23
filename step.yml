@@ -10,10 +10,8 @@ description: |-
   3. Set the **New value**.
 
   ### Troubleshooting
-  Please make sure that your targeted file path is correct, existing
-  and relative from the root folder.
-  Please make sure that you set a correct **Current value** which exists
-  in the targeted file. You must define this value.
+  Please make sure that your targeted file path is correct, existing and relative from the root folder.
+  Please make sure that you set a correct **Current value** which exists in the targeted file. You must define this value.
   Please make sure that you define the New value.
 
   ### Related Steps
