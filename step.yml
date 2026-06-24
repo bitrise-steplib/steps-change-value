@@ -1,4 +1,4 @@
-title: "Change value in file"
+title: Change value in file
 summary: Changes a selected value in a targeted file.
 description: |-
   This Step changes a selected value in a targeted file, for example, constants.
@@ -11,7 +11,7 @@ description: |-
 
   ### Troubleshooting
   Please make sure that your targeted file path is correct, existing and relative from the root folder.
-  Please make sure that you set a correct **Current value** which exists in the the targeted file. You must define this value.
+  Please make sure that you set a correct **Current value** which exists in the targeted file. You must define this value.
   Please make sure that you define the New value.
 
   ### Related Steps
@@ -22,36 +22,41 @@ source_code_url: https://github.com/bitrise-steplib/steps-change-value
 support_url: https://github.com/bitrise-steplib/steps-change-value/issues
 
 type_tags:
-  - utility
+- utility
 toolkit:
   go:
     package_name: github.com/bitrise-steplib/steps-change-value
 
 inputs:
-  - file:
-    opts:
-      title: "File path"
-      summary: "The target file path in which you want to change a value."
-      is_required: true
-  - old_value:
-    opts:
-      title: "Current value"
-      summary: "The current value which needs to be changed in the target file."
-      is_required: true
-  - new_value:
-    opts:
-      title: "New value"
-      summary: "The new value you want to write to the target file."
-      is_required: true
-  - show_file: "false"
-    opts:
-      title: "Print file content before and after the value change"
-      value_options:
-      - "true"
-      - "false"
-  - notfound_exit: "true"
-    opts:
-      title: "Mark the Step as \"Failed\" if the selected value isn't found"
-      value_options:
-      - "true"
-      - "false"
+- file:
+  opts:
+    title: File path
+    summary: The target file path in which you want to change a value.
+    description: Path to the file in which the value replacement will be performed. The path must be relative to the repository root.
+    is_required: true
+- old_value:
+  opts:
+    title: Current value
+    summary: The current value which needs to be changed in the target file.
+    description: The exact string to search for and replace in the target file. The step fails if this value is not found and Mark the Step as Failed if not found is enabled.
+    is_required: true
+- new_value:
+  opts:
+    title: New value
+    summary: The new value you want to write to the target file.
+    description: The string that replaces all occurrences of the current value in the target file.
+    is_required: true
+- show_file: "false"
+  opts:
+    title: Print file content before and after the value change
+    description: When enabled, prints the full file content to the build log before and after the replacement.
+    value_options:
+    - "true"
+    - "false"
+- notfound_exit: "true"
+  opts:
+    title: Mark the Step as "Failed" if the selected value isn't found
+    description: When enabled, the step fails if the current value is not found in the target file. Disable this to allow the step to succeed even if no replacement was made.
+    value_options:
+    - "true"
+    - "false"
