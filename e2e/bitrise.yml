@@ -25,7 +25,8 @@ step_bundles:
             set -ex
             echo -n "$original_content" > "$test_file_path"
             if [ "$root_owned" == "true" ] ; then
-              sudo chown root:root "$test_file_path"
+              # Use numeric IDs for portability: gid 0 is `root` on Linux but `wheel` on macOS
+              sudo chown 0:0 "$test_file_path"
               sudo chmod 644 "$test_file_path"
             fi
 
