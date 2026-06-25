@@ -109,8 +109,8 @@ func (s Step) Run(cfg Config) error {
 }
 
 // readFile reads the target file, falling back to an elevated read (when
-// useSudo is set) if the step lacks permission. On the 2026 Linux stack the
-// step runs as the non-root `ubuntu` user, so root-owned files require sudo.
+// useSudo is set) if the step lacks permission. On stacks where the
+// step runs as a non-root user, root-owned files require sudo.
 func (s Step) readFile(path string, useSudo bool) ([]byte, error) {
 	content, err := os.ReadFile(path)
 	if err == nil {

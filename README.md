@@ -42,7 +42,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `new_value` | The string that replaces all occurrences of the current value in the target file. | required |  |
 | `show_file` | When enabled, prints the full file content to the build log before and after the replacement. |  | `false` |
 | `notfound_exit` | When enabled, the step fails if the current value is not found in the target file. Disable this to allow the step to succeed even if no replacement was made. |  | `true` |
-| `use_sudo` | When enabled, the step retries reading and writing the target file with `sudo` if it hits a permission error.  This is required on newer stacks (such as the 2026 Linux stack) where the step runs as the non-root `ubuntu` user and the target file is owned by `root`. Disable this if `sudo` is unavailable in your environment or you want permission errors to fail the step directly. |  | `true` |
+| `use_sudo` | When enabled, the step retries reading and writing the target file with `sudo` if it hits a permission error.  This is required on stacks where the step runs as the non-root user and the target file is owned by `root`. Disable this if `sudo` is unavailable in your environment or you want permission errors to fail the step directly. |  | `true` |
 </details>
 
 <details>

@@ -112,7 +112,7 @@ workflows:
             and finally the third line
 
   test_replace_value_in_root_owned_file:
-    description: Tests that the step can change a value in a root-owned file via the sudo fallback. On the 2026 Linux stack the step runs as the non-root `ubuntu` user, so writing a root-owned file requires elevated privileges.
+    description: Tests that the step can change a value in a root-owned file via the sudo fallback. On stacks where the step runs as a non-root user, writing a root-owned file requires elevated privileges.
     steps:
     - bundle::setup:
         inputs:
