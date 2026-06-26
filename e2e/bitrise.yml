@@ -1,21 +1,15 @@
 format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
-workflows:
-  test_replace_value:
-    description: Tests that a value is correctly replaced in a target file.
-    envs:
-    - TEST_FILE_PATH: ./test.txt
-    - ORIGINAL_TEST_FILE_CONTENT: |-
-        this is the first line
-        the second line
-        and finally the third line
-    - REPLACE_THIS: second
-    - REPLACE_WITH: 2nd
-    - EXPECTED_TEST_FILE_CONTENT_AFTER_REPLACE: |-
-        this is the first line
-        the 2nd line
-        and finally the third line
+step_bundles:
+  # Switches into ./_tmp and writes the test input file. Set root_owned to
+  # "true" to make the file root-owned and not writable by the current user,
+  # forcing the step to use its sudo fallback.
+  setup:
+    inputs:
+    - test_file_path: ""
+    - original_content: ""
+    - root_owned: "false"
     steps:
     - change-workdir:
         title: Switch working dir to test _tmp dir
@@ -29,70 +23,156 @@ workflows:
         - content: |-
             #!/bin/bash
             set -ex
-            echo -n "$ORIGINAL_TEST_FILE_CONTENT" > "$TEST_FILE_PATH"
-    - path::../:
+            echo -n "$original_content" > "$test_file_path"
+            if [ "$root_owned" == "true" ] ; then
+              # Use numeric IDs for portability: gid 0 is `root` on Linux but `wheel` on macOS
+              sudo chown 0:0 "$test_file_path"
+              sudo chmod 644 "$test_file_path"
+            fi
+
+  # Runs the step under test against the generated file.
+  run_step:
+    inputs:
+    - test_file_path: ""
+    - replace_this: second
+    - replace_with: 2nd
+    - use_sudo: "true"
+    steps:
+    - path::./:
         run_if: "true"
         inputs:
         - show_file: "true"
-        - file: $TEST_FILE_PATH
-        - old_value: $REPLACE_THIS
-        - new_value: $REPLACE_WITH
+        - file: $test_file_path
+        - old_value: $replace_this
+        - new_value: $replace_with
+        - use_sudo: $use_sudo
+
+  # Asserts the target file matches the expected content after replacement.
+  verify:
+    inputs:
+    - test_file_path: ""
+    - expected_content: ""
+    steps:
     - script:
         title: Verify file content after replacement
         inputs:
         - content: |-
             #!/bin/bash
             set -ex
-            file_content="$(cat "$TEST_FILE_PATH")"
-            if [[ "$file_content" != "$EXPECTED_TEST_FILE_CONTENT_AFTER_REPLACE" ]] ; then
+            file_content="$(cat "$test_file_path")"
+            if [[ "$file_content" != "$expected_content" ]] ; then
               echo "File content did not match expected value!"
               exit 1
             fi
             echo "Perfect!"
 
-  test_notfound_exit:
-    description: Tests that the step fails when notfound_exit is true and the old value does not exist in the file.
+  # Runs a utility workflow that is expected to fail and asserts it does.
+  # Set skip_if_root to "true" for cases that can only fail as a non-root user.
+  expect_failure:
+    inputs:
+    - workflow: ""
+    - skip_if_root: "false"
     steps:
     - script:
-        title: Run step expecting failure, verify exit code
+        title: Run workflow expecting failure, verify exit code
         inputs:
         - content: |-
             #!/bin/bash
             set -x # Do not set -e: the inner bitrise run is expected to fail
-            bitrise run --config e2e/bitrise.yml _notfound_utility
+            if [ "$skip_if_root" == "true" ] && [ "$(id -u)" -eq 0 ] ; then
+              echo "Running as root: cannot exercise the non-root permission failure. Skipping."
+              exit 0
+            fi
+            bitrise run --config e2e/bitrise.yml "$workflow"
             if [ $? -ne 1 ] ; then
-              echo "Workflow was expected to fail but did not."
+              echo "Workflow ($workflow) was expected to fail but did not."
               exit 1
             fi
 
-  _notfound_utility:
-    envs:
-    - TEST_FILE_PATH: ./test.txt
-    - ORIGINAL_TEST_FILE_CONTENT: |-
-        this is the first line
-
-        and finally the third line
-    - REPLACE_THIS: second
-    - REPLACE_WITH: 2nd
+workflows:
+  test_replace_value:
+    description: Tests that a value is correctly replaced in a target file.
     steps:
-    - change-workdir:
-        title: Switch working dir to test _tmp dir
-        run_if: "true"
+    - bundle::setup:
         inputs:
-        - path: ./_tmp
-        - is_create_path: true
-    - script:
-        title: Generate test input file
+        - test_file_path: ./test.txt
+        - original_content: |-
+            this is the first line
+            the second line
+            and finally the third line
+    - bundle::run_step:
         inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            echo -n "$ORIGINAL_TEST_FILE_CONTENT" > "$TEST_FILE_PATH"
-    - path::../:
-        run_if: "true"
+        - test_file_path: ./test.txt
+    - bundle::verify:
         inputs:
-        - show_file: "true"
-        - file: $TEST_FILE_PATH
-        - old_value: $REPLACE_THIS
-        - new_value: $REPLACE_WITH
-        - notfound_exit: "true"
+        - test_file_path: ./test.txt
+        - expected_content: |-
+            this is the first line
+            the 2nd line
+            and finally the third line
+
+  test_replace_value_in_root_owned_file:
+    description: Tests that the step can change a value in a root-owned file via the sudo fallback. On stacks where the step runs as a non-root user, writing a root-owned file requires elevated privileges.
+    steps:
+    - bundle::setup:
+        inputs:
+        - test_file_path: ./root_owned.txt
+        - root_owned: "true"
+        - original_content: |-
+            this is the first line
+            the second line
+            and finally the third line
+    - bundle::run_step:
+        inputs:
+        - test_file_path: ./root_owned.txt
+        - use_sudo: "true"
+    - bundle::verify:
+        inputs:
+        - test_file_path: ./root_owned.txt
+        - expected_content: |-
+            this is the first line
+            the 2nd line
+            and finally the third line
+
+  test_no_sudo_root_owned_file_fails:
+    description: Tests that the step fails on a root-owned file when use_sudo is false, since the non-root user cannot write it without elevated privileges.
+    steps:
+    - bundle::expect_failure:
+        inputs:
+        - workflow: _no_sudo_utility
+        - skip_if_root: "true"
+
+  _no_sudo_utility:
+    steps:
+    - bundle::setup:
+        inputs:
+        - test_file_path: ./no_sudo_root_owned.txt
+        - root_owned: "true"
+        - original_content: |-
+            this is the first line
+            the second line
+            and finally the third line
+    - bundle::run_step:
+        inputs:
+        - test_file_path: ./no_sudo_root_owned.txt
+        - use_sudo: "false"
+
+  test_notfound_exit:
+    description: Tests that the step fails when notfound_exit is true and the old value does not exist in the file.
+    steps:
+    - bundle::expect_failure:
+        inputs:
+        - workflow: _notfound_utility
+
+  _notfound_utility:
+    steps:
+    - bundle::setup:
+        inputs:
+        - test_file_path: ./test.txt
+        - original_content: |-
+            this is the first line
+
+            and finally the third line
+    - bundle::run_step:
+        inputs:
+        - test_file_path: ./test.txt

@@ -1,11 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
+	"io/fs"
 	"os"
 	"strings"
 
 	"github.com/bitrise-io/go-steputils/v2/stepconf"
+	"github.com/bitrise-io/go-utils/v2/command"
 	"github.com/bitrise-io/go-utils/v2/env"
 	"github.com/bitrise-io/go-utils/v2/log"
 )
@@ -17,6 +22,7 @@ type Input struct {
 	NewValue     string `env:"new_value"`
 	ShowFile     bool   `env:"show_file"`
 	NotfoundExit bool   `env:"notfound_exit"`
+	UseSudo      bool   `env:"use_sudo"`
 }
 
 // Config holds validated step configuration.
@@ -26,18 +32,21 @@ type Config struct {
 	newValue     string
 	showFile     bool
 	notfoundExit bool
+	useSudo      bool
 }
 
 // Step implements the change-value step logic.
 type Step struct {
 	inputParser stepconf.InputParser
+	cmdFactory  command.Factory
 	logger      log.Logger
 }
 
 // NewStep creates a Step with injected dependencies.
-func NewStep(inputParser stepconf.InputParser, logger log.Logger) Step {
+func NewStep(inputParser stepconf.InputParser, cmdFactory command.Factory, logger log.Logger) Step {
 	return Step{
 		inputParser: inputParser,
+		cmdFactory:  cmdFactory,
 		logger:      logger,
 	}
 }
@@ -55,12 +64,13 @@ func (s Step) ProcessConfig() (Config, error) {
 		newValue:     input.NewValue,
 		showFile:     input.ShowFile,
 		notfoundExit: input.NotfoundExit,
+		useSudo:      input.UseSudo,
 	}, nil
 }
 
 // Run performs the value replacement in the target file.
 func (s Step) Run(cfg Config) error {
-	content, err := os.ReadFile(cfg.file)
+	content, err := s.readFile(cfg.file, cfg.useSudo)
 	if err != nil {
 		return fmt.Errorf("failed to read file (%s): %w", cfg.file, err)
 	}
@@ -90,11 +100,62 @@ func (s Step) Run(cfg Config) error {
 		s.logger.Printf("------------------------------------------")
 	}
 
-	if err := os.WriteFile(cfg.file, []byte(replaced), 0644); err != nil {
+	if err := s.writeFile(cfg.file, []byte(replaced), cfg.useSudo); err != nil {
 		return fmt.Errorf("failed to write file (%s): %w", cfg.file, err)
 	}
 
 	s.logger.Donef("Done")
+	return nil
+}
+
+// readFile reads the target file, falling back to an elevated read (when
+// useSudo is set) if the step lacks permission. On stacks where the
+// step runs as a non-root user, root-owned files require sudo.
+func (s Step) readFile(path string, useSudo bool) ([]byte, error) {
+	content, err := os.ReadFile(path)
+	if err == nil {
+		return content, nil
+	}
+	if !useSudo || !errors.Is(err, fs.ErrPermission) {
+		return nil, err
+	}
+
+	s.logger.Warnf("Permission denied reading %s, retrying with sudo", path)
+	var stdout, stderr bytes.Buffer
+	cmd := s.cmdFactory.Create("sudo", []string{"-n", "cat", path}, &command.Opts{
+		Stdout: &stdout,
+		Stderr: &stderr,
+	})
+	if runErr := cmd.Run(); runErr != nil {
+		return nil, fmt.Errorf("elevated read failed (%s): %w", strings.TrimSpace(stderr.String()), runErr)
+	}
+	return stdout.Bytes(), nil
+}
+
+// writeFile writes content to the target file, falling back to an elevated
+// write (when useSudo is set) if the step lacks permission (see readFile for
+// context). `sudo tee` preserves the existing file's owner and mode; `-n`
+// prevents sudo from blocking on a password prompt (and from consuming the
+// piped content).
+func (s Step) writeFile(path string, content []byte, useSudo bool) error {
+	err := os.WriteFile(path, content, 0644)
+	if err == nil {
+		return nil
+	}
+	if !useSudo || !errors.Is(err, fs.ErrPermission) {
+		return err
+	}
+
+	s.logger.Warnf("Permission denied writing %s, retrying with sudo", path)
+	var stderr bytes.Buffer
+	cmd := s.cmdFactory.Create("sudo", []string{"-n", "tee", path}, &command.Opts{
+		Stdin:  bytes.NewReader(content),
+		Stdout: io.Discard,
+		Stderr: &stderr,
+	})
+	if runErr := cmd.Run(); runErr != nil {
+		return fmt.Errorf("elevated write failed (%s): %w", strings.TrimSpace(stderr.String()), runErr)
+	}
 	return nil
 }
 
@@ -106,7 +167,8 @@ func run() int {
 	logger := log.NewLogger()
 	envRepository := env.NewRepository()
 	inputParser := stepconf.NewInputParser(envRepository)
-	step := NewStep(inputParser, logger)
+	cmdFactory := command.NewFactory(envRepository)
+	step := NewStep(inputParser, cmdFactory, logger)
 
 	cfg, err := step.ProcessConfig()
 	if err != nil {
